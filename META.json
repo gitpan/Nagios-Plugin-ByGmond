@@ -1,5 +1,5 @@
 {
-   "abstract" : "The great new Nagios::Plugin::ByGmond!",
+   "abstract" : "Nagios plugin for checking metrics from ganglia monitor daemon TCP output.",
    "author" : [
       "chenryn <rao.chenlin@gmail.com>"
    ],
@@ -40,5 +40,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.01"
+   "version" : "0.02"
 }

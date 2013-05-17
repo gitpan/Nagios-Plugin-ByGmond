@@ -1,5 +1,5 @@
 ---
-abstract: 'The great new Nagios::Plugin::ByGmond!'
+abstract: 'Nagios plugin for checking metrics from ganglia monitor daemon TCP output.'
 author:
   - 'chenryn <rao.chenlin@gmail.com>'
 build_requires:
@@ -22,4 +22,4 @@ requires:
   Nagios::Plugin: 0
   XML::Simple: 0
   perl: 5.006
-version: 0.01
+version: 0.02

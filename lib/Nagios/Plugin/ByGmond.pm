@@ -6,11 +6,11 @@ use XML::Simple;
 use IO::Socket::INET;
 use base 'Nagios::Plugin';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
-Nagios::Plugin::ByGmond - The great new Nagios::Plugin::ByGmond!
+Nagios::Plugin::ByGmond - Nagios plugin for checking metrics from ganglia monitor daemon TCP output.
 
 =head1 SYNOPSIS
 
@@ -25,7 +25,7 @@ Please setup your nagios config.
  
   define command {
     command_name    check_memory_by_gmond
-    command_line    /usr/bin/check_by_gmond -H $HOSTADDRESS$ -w 3 -c 5 -m 'mem_total'
+    command_line    /usr/local/bin/check_by_gmond -H $HOSTADDRESS$ -w 3 -c 5 -m 'mem_total'
   }
  
 This plugin use metric named by ganglia. Please saw documention of ganglia before using.
@@ -121,6 +121,8 @@ sub run {
 
 }
 
+1;
+
 =head1 AUTHOR
 
 chenryn, C<< <rao.chenlin at gmail.com> >>
@@ -209,5 +211,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
-
-1;    # End of Nagios::Plugin::ByGmond

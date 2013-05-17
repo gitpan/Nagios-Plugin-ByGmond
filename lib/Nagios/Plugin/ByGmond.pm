@@ -6,7 +6,7 @@ use XML::Simple;
 use IO::Socket::INET;
 use base 'Nagios::Plugin';
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ This plugin use metric named by ganglia. Please saw documention of ganglia befor
 
 sub new {
     my $class = shift;
-    my $self = $class->SUPER::new(
+    my $self  = $class->SUPER::new(
         usage => <<END_USAGE,
 Usage: %s [ -v|--verbose ] [-H|--host=<host>] [-p|--port=<port>] [-m|--metric=<metric>]
 [ -c|--critical=<critical threshold> ]
@@ -63,7 +63,7 @@ END_HELP
         spec    => 'host|H=s',
         default => 'localhost.localdomain',
         help    => <<END_HELP,
--h, --host
+-H, --host
 Gmond Host (defaults to localhost.localdomain)
 END_HELP
     );
@@ -83,10 +83,11 @@ Gmetric name
 END_HELP
     );
     return $self;
-};
+}
 
 sub run {
     my $self = shift;
+
     # Parse arguments and process standard ones (e.g. usage, help, version)
     $self->getopts;
     if (   !defined $self->opts->warning
@@ -101,23 +102,40 @@ sub run {
         PeerAddr => $self->opts->host,
         PeerPort => $self->opts->port,
         Proto    => 'tcp'
-    ) or $self->nagios_die('Connect to '.$self->opts->host.' error: '. $!);
+      )
+      or
+      $self->nagios_die( 'Connect to ' . $self->opts->host . ' error: ' . $! );
     my $data;
-    while(<$sock>){ $data .= $_ };
-    my $metric_arrayref = XMLin($data)->{CLUSTER}->{HOST}->{METRIC};
+    while (<$sock>) { $data .= $_ }
+    my $gmond_ref = XMLin($data)->{CLUSTER}->{HOST};
+    my $host_ref;
+    if ( ref($gmond_ref) eq 'ARRAY' ) {
+        for my $host ( @{$gmond_ref} ) {
+            if ( $host->{IP} eq $self->opts->host
+              or $host->{NAME} eq $self->opts->host ) {
+                $host_ref = $host;
+                last;
+            }
+        }
+    } else {
+        $host_ref = $gmond_ref;
+    }
+    my $metric_arrayref = $host_ref->{METRIC};
     for my $metric (@$metric_arrayref) {
         next unless $self->opts->metric eq $metric->{NAME};
         $self->add_perfdata(
-            label => $metric->{NAME},
-            value => $metric->{VAL},
-            uom   => $metric->{UNITS},
+            label     => $metric->{NAME},
+            value     => $metric->{VAL},
+            uom       => $metric->{UNITS},
             threshold => $self->threshold,
         );
         $self->nagios_exit(
-            return_code => $self->check_threshold($metric->{VAL}),
-            message     => sprintf "%s: %f %s\n", $metric->{EXTRA_DATA}->{EXTRA_ELEMENT}->[1]->{VAL}, $metric->{VAL}, $metric->{UNITS},
+            return_code => $self->check_threshold( $metric->{VAL} ),
+            message     => sprintf "%s: %f %s\n",
+            $metric->{EXTRA_DATA}->{EXTRA_ELEMENT}->[1]->{VAL}, $metric->{VAL},
+            $metric->{UNITS},
         );
-    };
+    }
 
 }
 

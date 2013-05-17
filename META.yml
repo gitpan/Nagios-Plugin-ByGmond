@@ -22,4 +22,4 @@ requires:
   Nagios::Plugin: 0
   XML::Simple: 0
   perl: 5.006
-version: 0.02
+version: 0.04
